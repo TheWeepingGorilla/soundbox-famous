@@ -12,6 +12,7 @@ var Sound = {
     this.gainNode.gain.value = 0;
     this.osc.connect(this.gainNode);
     this.gainNode.connect(audioContext.destination);
+    this.amp = 0;
   },
   makeSound: function(audioContext, pitch, wave, amp){
     this.osc.type = wave;
@@ -126,7 +127,6 @@ define(function(require, exports, module) {
   Engine.on('prerender', function(){
     ball.state.setTransform(ball.particle.getTransform());
     wallSound0.ampControl(audioContext, -.01);
-    console.log("Magnitude: " + readMagnitude(ball.particle) + " Direction: " + readDirection(ball.particle));
   });
 });
 
