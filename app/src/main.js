@@ -45,6 +45,12 @@ var Sound = {
 
 wallSound0 = Object.create(Sound);
 wallSound0.initialize(audioContext);
+wallSound1 = Object.create(Sound);
+wallSound1.initialize(audioContext);
+wallSound2 = Object.create(Sound);
+wallSound2.initialize(audioContext);
+wallSound3 = Object.create(Sound);
+wallSound3.initialize(audioContext);
 
 
 // ----------- famo.us params ----------------
@@ -118,7 +124,16 @@ define(function(require, exports, module) {
   physicsEngine.attach(bottomWall,[ball.particle]);
 
   rightWall.on('collision',function(){
-    wallSound0.makeSound(audioContext, 200, "square", 1);
+    wallSound0.makeSound(audioContext, 100, "square", 1);
+  });
+  leftWall.on('collision',function(){
+    wallSound1.makeSound(audioContext, 200, "square", 1);
+  });
+  topWall.on('collision',function(){
+    wallSound2.makeSound(audioContext, 400, "square", 1);
+  });
+  bottomWall.on('collision',function(){
+    wallSound3.makeSound(audioContext, 800, "square", 1);
   });
 
   //reset ball valocity to constant value
@@ -127,6 +142,9 @@ define(function(require, exports, module) {
   Engine.on('prerender', function(){
     ball.state.setTransform(ball.particle.getTransform());
     wallSound0.ampControl(audioContext, -.01);
+    wallSound1.ampControl(audioContext, -.01);
+    wallSound2.ampControl(audioContext, -.01);
+    wallSound3.ampControl(audioContext, -.01);
   });
 });
 
