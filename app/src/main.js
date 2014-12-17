@@ -74,6 +74,21 @@ define(function(require, exports, module) {
 
   var mainContext = Engine.createContext();
 
+  var controlPanel = new Surface({
+    size: [(window.innerWidth * .382), undefined],
+    content: '<h2>Control Panel</h2>',
+    properties: {
+      color: 'white',
+      textAlign: 'center',
+      backgroundColor: '#FA5C4F'
+    }
+  });
+  var controlPanelAlign = new StateModifier({
+        align: [1,0],
+        origin: [1, 0]
+    });
+  mainContext.add(controlPanelAlign).add(controlPanel);
+
   var physicsEngine = new PhysicsEngine();
   var ball = new Surface ({
     size: [50,50],
@@ -114,7 +129,7 @@ define(function(require, exports, module) {
   mainContext.add(ball.state).add(ball);
 
   var leftWall = new Wall({normal : [1,0,0], distance : 0, restitution : 0.6});
-  var rightWall = new Wall({normal : [-1,0,0], distance : window.innerWidth, restitution : 0.6});
+  var rightWall = new Wall({normal : [-1,0,0], distance : (window.innerWidth * .618), restitution : 0.6});
   var topWall = new Wall({normal : [0,1,0], distance : 0, restitution : 0.6});
   var bottomWall = new Wall({normal : [0,-1,0], distance : window.innerHeight, restitution : 0.6});
 
