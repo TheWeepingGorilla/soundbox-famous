@@ -92,6 +92,10 @@ define(function(require, exports, module) {
     });
   mainContext.add(controlPanelAlign).add(controlPanel);
 
+  // Ball setup
+
+  var ballArray = [];
+
   var Ball = {
     initialize: function() {
       this.surface = new Surface ({
@@ -111,11 +115,7 @@ define(function(require, exports, module) {
 
   ball0 = Object.create(Ball);
   ball0.initialize();
-  // ball0.state = new StateModifier({origin:[.5,.5]});
-  // ball0.particle = new Circle({radius:20});
-  // physicsEngine.addBody(ball0.particle);
-  // setMagAndDir(ball0.particle, 0.8, 220);
-  // mainContext.add(ball0.state).add(ball0.surface);
+  ballArray.push(ball0);
 
   // ball functions
   function readMagnitude(particle) {
@@ -163,13 +163,19 @@ define(function(require, exports, module) {
   });
 
   //reset ball valocity to constant value
-  Timer.setInterval( function() { setMagAndDir(ball0.particle, 0.8, readDirection(ball0.particle)); }, 1);
 
-  Engine.on('prerender', function(){
-    ball0.state.setTransform(ball0.particle.getTransform());
-    wallSound0.ampControl(audioContext, -.01);
-    wallSound1.ampControl(audioContext, -.01);
-    wallSound2.ampControl(audioContext, -.01);
-    wallSound3.ampControl(audioContext, -.01);
-  });
+  // Timer.every( function() { setMagAndDir(ball0.particle, 0.8, readDirection(ball0.particle)); }, 1);
+  Timer.every( function() {
+    for (i=0; i<ballArray.length; i++) {
+      console.log(i);
+      console.log(ballArray[i]);
+      setMagAndDir(ballArray[i].particle, 0.8, readDirection(ballArray[i].particle));
+      ballArray[i].state.setTransform(ballArray[i].particle.getTransform());
+      wallSound0.ampControl(audioContext, -.01);
+      wallSound1.ampControl(audioContext, -.01);
+      wallSound2.ampControl(audioContext, -.01);
+      wallSound3.ampControl(audioContext, -.01);
+    }
+  }, 1);
+
 });
