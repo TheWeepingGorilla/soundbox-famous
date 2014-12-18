@@ -55,7 +55,7 @@ wallSound3.initialize(audioContext);
 
 // ----------- famo.us params ----------------
 
-/* globals define */
+/* global setup */
 define(function(require, exports, module) {
   // 'use strict';
   // import dependencies
@@ -73,6 +73,9 @@ define(function(require, exports, module) {
   var Wall = require('famous/physics/constraints/Wall');
 
   var mainContext = Engine.createContext();
+  var physicsEngine = new PhysicsEngine();
+
+  // control panel setup
 
   var controlPanel = new Surface({
     size: [(window.innerWidth * .382), undefined],
@@ -89,23 +92,47 @@ define(function(require, exports, module) {
     });
   mainContext.add(controlPanelAlign).add(controlPanel);
 
-  var physicsEngine = new PhysicsEngine();
-  var ball = new Surface ({
-    size: [50,50],
-    properties: {
-      backgroundColor: 'red',
-      borderRadius: '200px'
-    },
-  });
+  // ball setup
+  // var ball0 = new Surface ({
+  //   size: [50,50],
+  //   properties: {
+  //     backgroundColor: 'red',
+  //     borderRadius: '200px'
+  //   },
+  // });
 
-  ball.state = new StateModifier({origin:[.5,.5]});
+  // ball0.state = new StateModifier({origin:[.5,.5]});
 
-  ball.particle = new Circle({radius:20});
+  // ball0.particle = new Circle({radius:20});
 
-  physicsEngine.addBody(ball.particle);
+  // physicsEngine.addBody(ball0.particle);
 
-  setMagAndDir(ball.particle, 0.8, 220);
+  // setMagAndDir(ball0.particle, 0.8, 220);
 
+  // mainContext.add(ball0.state).add(ball0);
+
+  var Ball = {
+    initialize: function() {
+      this.surface = new Surface ({
+        size: [50,50],
+        properties: {
+          backgroundColor: 'red',
+          borderRadius: '200px'
+        }
+      })
+    }
+  },
+
+  ball0 = Object.create(Ball);
+  ball0.initialize();
+  ball0.state = new StateModifier({origin:[.5,.5]});
+  ball0.particle = new Circle({radius:20});
+  physicsEngine.addBody(ball0.particle);
+  setMagAndDir(ball0.particle, 0.8, 220);
+  mainContext.add(ball0.state).add(ball0.surface);
+
+
+  // ball functions
   function readMagnitude(particle) {
     return Math.sqrt( ((particle.getVelocity()[0]) * (particle.getVelocity()[0])) + ((particle.getVelocity()[1]) * (particle.getVelocity()[1])) );
   };
@@ -126,17 +153,16 @@ define(function(require, exports, module) {
     particle.setVelocity([xComp,yComp,0]);
   };
 
-  mainContext.add(ball.state).add(ball);
-
+  // wall setup
   var leftWall = new Wall({normal : [1,0,0], distance : 0, restitution : 0.6});
   var rightWall = new Wall({normal : [-1,0,0], distance : (window.innerWidth * .618), restitution : 0.6});
   var topWall = new Wall({normal : [0,1,0], distance : 0, restitution : 0.6});
   var bottomWall = new Wall({normal : [0,-1,0], distance : window.innerHeight, restitution : 0.6});
 
-  physicsEngine.attach(leftWall,  [ball.particle]);
-  physicsEngine.attach(rightWall, [ball.particle]);
-  physicsEngine.attach(topWall,   [ball.particle]);
-  physicsEngine.attach(bottomWall,[ball.particle]);
+  physicsEngine.attach(leftWall,  [ball0.particle]);
+  physicsEngine.attach(rightWall, [ball0.particle]);
+  physicsEngine.attach(topWall,   [ball0.particle]);
+  physicsEngine.attach(bottomWall,[ball0.particle]);
 
   rightWall.on('collision',function(){
     wallSound0.makeSound(audioContext, 100, "square", 1);
@@ -152,17 +178,13 @@ define(function(require, exports, module) {
   });
 
   //reset ball valocity to constant value
-  Timer.setInterval( function() { setMagAndDir(ball.particle, 0.8, readDirection(ball.particle)); }, 1);
+  Timer.setInterval( function() { setMagAndDir(ball0.particle, 0.8, readDirection(ball0.particle)); }, 1);
 
   Engine.on('prerender', function(){
-    ball.state.setTransform(ball.particle.getTransform());
+    ball0.state.setTransform(ball0.particle.getTransform());
     wallSound0.ampControl(audioContext, -.01);
     wallSound1.ampControl(audioContext, -.01);
     wallSound2.ampControl(audioContext, -.01);
     wallSound3.ampControl(audioContext, -.01);
   });
 });
-
-
-
-
