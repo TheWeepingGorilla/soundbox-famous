@@ -92,25 +92,6 @@ define(function(require, exports, module) {
     });
   mainContext.add(controlPanelAlign).add(controlPanel);
 
-  // ball setup
-  // var ball0 = new Surface ({
-  //   size: [50,50],
-  //   properties: {
-  //     backgroundColor: 'red',
-  //     borderRadius: '200px'
-  //   },
-  // });
-
-  // ball0.state = new StateModifier({origin:[.5,.5]});
-
-  // ball0.particle = new Circle({radius:20});
-
-  // physicsEngine.addBody(ball0.particle);
-
-  // setMagAndDir(ball0.particle, 0.8, 220);
-
-  // mainContext.add(ball0.state).add(ball0);
-
   var Ball = {
     initialize: function() {
       this.surface = new Surface ({
@@ -119,18 +100,22 @@ define(function(require, exports, module) {
           backgroundColor: 'red',
           borderRadius: '200px'
         }
-      })
+      });
+      this.state = new StateModifier({origin:[.5,.5]});
+      this.particle = new Circle({radius:20});
+      physicsEngine.addBody(this.particle);
+      setMagAndDir(this.particle, 0.8, 220);
+      mainContext.add(this.state).add(this.surface);
     }
   },
 
   ball0 = Object.create(Ball);
   ball0.initialize();
-  ball0.state = new StateModifier({origin:[.5,.5]});
-  ball0.particle = new Circle({radius:20});
-  physicsEngine.addBody(ball0.particle);
-  setMagAndDir(ball0.particle, 0.8, 220);
-  mainContext.add(ball0.state).add(ball0.surface);
-
+  // ball0.state = new StateModifier({origin:[.5,.5]});
+  // ball0.particle = new Circle({radius:20});
+  // physicsEngine.addBody(ball0.particle);
+  // setMagAndDir(ball0.particle, 0.8, 220);
+  // mainContext.add(ball0.state).add(ball0.surface);
 
   // ball functions
   function readMagnitude(particle) {
