@@ -97,25 +97,28 @@ define(function(require, exports, module) {
   var ballArray = [];
 
   var Ball = {
-    initialize: function() {
+    initialize: function(mag, dir, color) {
       this.surface = new Surface ({
         size: [50,50],
         properties: {
-          backgroundColor: 'red',
+          backgroundColor: color,
           borderRadius: '200px'
         }
       });
       this.state = new StateModifier({origin:[.5,.5]});
       this.particle = new Circle({radius:20});
       physicsEngine.addBody(this.particle);
-      setMagAndDir(this.particle, 0.8, 220);
+      setMagAndDir(this.particle, mag, dir);
       mainContext.add(this.state).add(this.surface);
     }
   },
 
   ball0 = Object.create(Ball);
-  ball0.initialize();
+  ball0.initialize(0.8, 220, 'red');
   ballArray.push(ball0);
+  ball1 = Object.create(Ball);
+  ball1.initialize(0.8, 310, 'blue');
+  ballArray.push(ball1);
 
   // ball functions
   function readMagnitude(particle) {
@@ -148,27 +151,31 @@ define(function(require, exports, module) {
   physicsEngine.attach(rightWall, [ball0.particle]);
   physicsEngine.attach(topWall,   [ball0.particle]);
   physicsEngine.attach(bottomWall,[ball0.particle]);
+  physicsEngine.attach(leftWall,  [ball1.particle]);
+  physicsEngine.attach(rightWall, [ball1.particle]);
+  physicsEngine.attach(topWall,   [ball1.particle]);
+  physicsEngine.attach(bottomWall,[ball1.particle]);
 
   rightWall.on('collision',function(){
-    wallSound0.makeSound(audioContext, 100, "square", 1);
+    wallSound0.makeSound(audioContext, 220, "square", 1);
   });
   leftWall.on('collision',function(){
-    wallSound1.makeSound(audioContext, 200, "square", 1);
+    wallSound1.makeSound(audioContext, 294, "square", 1);
   });
   topWall.on('collision',function(){
-    wallSound2.makeSound(audioContext, 400, "square", 1);
+    wallSound2.makeSound(audioContext, 330, "square", 1);
   });
   bottomWall.on('collision',function(){
-    wallSound3.makeSound(audioContext, 800, "square", 1);
+    wallSound3.makeSound(audioContext, 392, "square", 1);
   });
 
-  //reset ball valocity to constant value
+  //  Update functions (each tick):
+  //    Reset balls to set speed
+  //    Apply transforms to balls
+  //    Apply sound envelope to objects
 
-  // Timer.every( function() { setMagAndDir(ball0.particle, 0.8, readDirection(ball0.particle)); }, 1);
   Timer.every( function() {
     for (i=0; i<ballArray.length; i++) {
-      console.log(i);
-      console.log(ballArray[i]);
       setMagAndDir(ballArray[i].particle, 0.8, readDirection(ballArray[i].particle));
       ballArray[i].state.setTransform(ballArray[i].particle.getTransform());
       wallSound0.ampControl(audioContext, -.01);
