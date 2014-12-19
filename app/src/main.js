@@ -52,7 +52,6 @@ wallSound2.initialize(audioContext);
 wallSound3 = Object.create(Sound);
 wallSound3.initialize(audioContext);
 
-
 // ----------- famo.us params ----------------
 
 /* global setup */
@@ -108,8 +107,27 @@ define(function(require, exports, module) {
       this.state = new StateModifier({origin:[.5,.5]});
       this.particle = new Circle({radius:20});
       physicsEngine.addBody(this.particle);
-      setMagAndDir(this.particle, mag, dir);
+      this.setMagAndDir(mag, dir);
       mainContext.add(this.state).add(this.surface);
+    },
+    readMagnitude: function() {
+      return Math.sqrt( ((this.particle.getVelocity()[0]) * (this.particle.getVelocity()[0])) + ((this.particle.getVelocity()[1]) * (this.particle.getVelocity()[1])) );
+    },
+    readDirection: function() {
+      var direction = Math.atan2((-1 * this.particle.getVelocity()[1]), this.particle.getVelocity()[0]);
+      direction = direction * (180 / Math.PI);
+      if (this.particle.getVelocity()[1] > 0) {
+        direction = direction + 360;
+      }
+      console.log("Direction Returned is: " + direction);
+      return direction;
+    },
+    setMagAndDir: function(magnitude, angle) {
+      angle = angle * (Math.PI / 180);
+      var xComp = magnitude * Math.cos(angle);
+      var yComp = -1 * magnitude * Math.sin(angle);
+      this.particle.setVelocity([xComp,yComp,0]);
+      console.log("Set to " + magnitude + ", " + angle);
     }
   },
 
@@ -119,27 +137,6 @@ define(function(require, exports, module) {
   ball1 = Object.create(Ball);
   ball1.initialize(0.8, 310, 'blue');
   ballArray.push(ball1);
-
-  // ball functions
-  function readMagnitude(particle) {
-    return Math.sqrt( ((particle.getVelocity()[0]) * (particle.getVelocity()[0])) + ((particle.getVelocity()[1]) * (particle.getVelocity()[1])) );
-  };
-
-  function readDirection(particle) {
-    var direction = Math.atan2((-1 * particle.getVelocity()[1]),particle.getVelocity()[0]);
-    direction = direction * (180 / Math.PI);
-    if (particle.getVelocity()[1] > 0) {
-      direction = direction + 360;
-    }
-    return direction;
-  };
-
-  function setMagAndDir(particle, magnitude, angle) {
-    angle = angle * (Math.PI / 180);
-    var xComp = magnitude * Math.cos(angle);
-    var yComp = -1 * magnitude * Math.sin(angle);
-    particle.setVelocity([xComp,yComp,0]);
-  };
 
   // wall setup
   var leftWall = new Wall({normal : [1,0,0], distance : 0, restitution : 0.6});
@@ -176,7 +173,7 @@ define(function(require, exports, module) {
 
   Timer.every( function() {
     for (i=0; i<ballArray.length; i++) {
-      setMagAndDir(ballArray[i].particle, 0.8, readDirection(ballArray[i].particle));
+      ballArray[i].setMagAndDir(0.8, ballArray[i].readDirection());
       ballArray[i].state.setTransform(ballArray[i].particle.getTransform());
       wallSound0.ampControl(audioContext, -.01);
       wallSound1.ampControl(audioContext, -.01);
