@@ -1,62 +1,65 @@
- // ---------- Sound Params -----------------
+define(function(require, exports, module) {
 
-var audioContext = new webkitAudioContext();
-audioContext.sampleRate = 44100;
+  var audioContext = new webkitAudioContext();
+  audioContext.sampleRate = 44100;
 
-var Sound = {
-  initialize: function(audioContext){
-    this.osc = audioContext.createOscillator();
-    this.osc.noteOn(0);
-    this.osc.type = 'sawtooth';
-    this.gainNode = audioContext.createGain();
-    this.gainNode.gain.value = 0;
-    this.osc.connect(this.gainNode);
-    this.gainNode.connect(audioContext.destination);
-    this.amp = 0;
-  },
-  makeSound: function(audioContext, pitch, wave, amp){
-    this.osc.type = wave;
-    this.osc.frequency.setValueAtTime(pitch, audioContext.currentTime);
-    this.amp = amp;
-    this.gainNode.gain.setValueAtTime(this.amp, audioContext.currentTime);
-    this.gainNode.connect(audioContext.destination);
-  },
-  ampControl: function(audioContext, amount) {
-    if (this.amp + amount > 1.0) {
-      this.amp = 1.0;
-      this.gainNode.gain.setValueAtTime(this.amp, audioContext.currentTime);
-    }
-    else if ((this.amp < .01) && ((this.amp + amount) >= .01)) {
-      this.amp = this.amp + amount;
+  var Sound = {
+    initialize: function(audioContext){
+      this.osc = audioContext.createOscillator();
+      this.osc.noteOn(0);
+      this.osc.type = 'sawtooth';
+      this.gainNode = audioContext.createGain();
+      this.gainNode.gain.value = 0;
+      this.osc.connect(this.gainNode);
+      this.gainNode.connect(audioContext.destination);
+      this.amp = 0;
+    },
+    makeSound: function(audioContext, pitch, wave, amp){
+      this.osc.type = wave;
+      this.osc.frequency.setValueAtTime(pitch, audioContext.currentTime);
+      this.amp = amp;
       this.gainNode.gain.setValueAtTime(this.amp, audioContext.currentTime);
       this.gainNode.connect(audioContext.destination);
+    },
+    ampControl: function(audioContext, amount) {
+      if (this.amp + amount > 1.0) {
+        this.amp = 1.0;
+        this.gainNode.gain.setValueAtTime(this.amp, audioContext.currentTime);
+      }
+      else if ((this.amp < .01) && ((this.amp + amount) >= .01)) {
+        this.amp = this.amp + amount;
+        this.gainNode.gain.setValueAtTime(this.amp, audioContext.currentTime);
+        this.gainNode.connect(audioContext.destination);
+      }
+      else if ((this.amp + amount) < .01) {
+        this.amp = 0;
+        this.gainNode.gain.setValueAtTime(this.amp, audioContext.currentTime);
+        this.gainNode.disconnect();
+      }
+      else {
+        this.amp = this.amp + amount;
+        this.gainNode.gain.setValueAtTime(this.amp, audioContext.currentTime);
+      }
     }
-    else if ((this.amp + amount) < .01) {
-      this.amp = 0;
-      this.gainNode.gain.setValueAtTime(this.amp, audioContext.currentTime);
-      this.gainNode.disconnect();
-    }
-    else {
-      this.amp = this.amp + amount;
-      this.gainNode.gain.setValueAtTime(this.amp, audioContext.currentTime);
-    }
-  }
-},
+  },
 
-wallSound0 = Object.create(Sound);
-wallSound0.initialize(audioContext);
-wallSound1 = Object.create(Sound);
-wallSound1.initialize(audioContext);
-wallSound2 = Object.create(Sound);
-wallSound2.initialize(audioContext);
-wallSound3 = Object.create(Sound);
-wallSound3.initialize(audioContext);
+  /*  For some bizarre reason, this program will not compile without
+      at least one sound being defined here (ahead of the famo.us requires).
+      Since there will always be walls it is safe enough for now to predefine the
+      sound objects for them here and add them later, clumsy as that is.
+      First person to explain lucidly to me what's going on will get a
+      beverage :-) */
 
-// ----------- famo.us params ----------------
+  wallSound0 = Object.create(Sound);
+  wallSound0.initialize(audioContext);
+  wallSound1 = Object.create(Sound);
+  wallSound1.initialize(audioContext);
+  wallSound2 = Object.create(Sound);
+  wallSound2.initialize(audioContext);
+  wallSound3 = Object.create(Sound);
+  wallSound3.initialize(audioContext);
 
-/* global setup */
-define(function(require, exports, module) {
-  // 'use strict';
+  'use strict';
   // import dependencies
   var Engine = require('famous/core/Engine');
   var Surface  = require('famous/core/Surface');
@@ -86,9 +89,9 @@ define(function(require, exports, module) {
     }
   });
   var controlPanelAlign = new StateModifier({
-        align: [1,0],
-        origin: [1, 0]
-    });
+    align: [1,0],
+    origin: [1, 0]
+  });
   mainContext.add(controlPanelAlign).add(controlPanel);
 
   // Ball setup
@@ -119,7 +122,6 @@ define(function(require, exports, module) {
       if (this.particle.getVelocity()[1] > 0) {
         direction = direction + 360;
       }
-      console.log("Direction Returned is: " + direction);
       return direction;
     },
     setMagAndDir: function(magnitude, angle) {
@@ -127,7 +129,6 @@ define(function(require, exports, module) {
       var xComp = magnitude * Math.cos(angle);
       var yComp = -1 * magnitude * Math.sin(angle);
       this.particle.setVelocity([xComp,yComp,0]);
-      console.log("Set to " + magnitude + ", " + angle);
     }
   },
 
@@ -139,31 +140,42 @@ define(function(require, exports, module) {
   ballArray.push(ball1);
 
   // wall setup
-  var leftWall = new Wall({normal : [1,0,0], distance : 0, restitution : 0.6});
-  var rightWall = new Wall({normal : [-1,0,0], distance : (window.innerWidth * .618), restitution : 0.6});
-  var topWall = new Wall({normal : [0,1,0], distance : 0, restitution : 0.6});
-  var bottomWall = new Wall({normal : [0,-1,0], distance : window.innerHeight, restitution : 0.6});
 
-  physicsEngine.attach(leftWall,  [ball0.particle]);
-  physicsEngine.attach(rightWall, [ball0.particle]);
-  physicsEngine.attach(topWall,   [ball0.particle]);
-  physicsEngine.attach(bottomWall,[ball0.particle]);
-  physicsEngine.attach(leftWall,  [ball1.particle]);
-  physicsEngine.attach(rightWall, [ball1.particle]);
-  physicsEngine.attach(topWall,   [ball1.particle]);
-  physicsEngine.attach(bottomWall,[ball1.particle]);
+  var Wally = {
+    initialize: function(norm, dist, rest, ballArr, physEng, audioCon, freq, wav, initAmp) {
+      this.wall = new Wall({normal : norm, distance : dist, restitution : rest});
+      this.audioContext = audioCon;
+      this.frequency = freq;
+      this.waveform = wav;
+      this.initAmplitude = initAmp;
+      for (i=0; i< ballArr.length; i++) {
+        physEng.attach(this.wall, [ballArr[i].particle]);
+      };
+    }
+  },
 
-  rightWall.on('collision',function(){
-    wallSound0.makeSound(audioContext, 220, "square", 1);
+  rightWall = Object.create(Wally);
+  rightWall.initialize([-1,0,0], (window.innerWidth * .618), 0.6, ballArray, physicsEngine, audioContext, 294, "square", 1);
+  rightWall.wall.on('collision',function(){
+    wallSound0.makeSound(rightWall.audioContext, rightWall.frequency, rightWall.waveform, rightWall.initAmplitude);
   });
-  leftWall.on('collision',function(){
-    wallSound1.makeSound(audioContext, 294, "square", 1);
+
+  leftWall = Object.create(Wally);
+  leftWall.initialize([1,0,0], 0, 0.6, ballArray, physicsEngine, audioContext, 220, "square", 1);
+  leftWall.wall.on('collision',function(){
+    wallSound1.makeSound(leftWall.audioContext, leftWall.frequency, leftWall.waveform, leftWall.initAmplitude);
   });
-  topWall.on('collision',function(){
-    wallSound2.makeSound(audioContext, 330, "square", 1);
+
+  topWall = Object.create(Wally);
+  topWall.initialize([0,1,0], 0, 0.6, ballArray, physicsEngine, audioContext, 330, "square", 1);
+  topWall.wall.on('collision',function(){
+    wallSound2.makeSound(topWall.audioContext, topWall.frequency, topWall.waveform, topWall.initAmplitude);
   });
-  bottomWall.on('collision',function(){
-    wallSound3.makeSound(audioContext, 392, "square", 1);
+
+  bottomWall = Object.create(Wally);
+  bottomWall.initialize([0,-1,0], window.innerHeight, 0.6, ballArray, physicsEngine, audioContext, 392, "square", 1);
+  bottomWall.wall.on('collision',function(){
+    wallSound3.makeSound(bottomWall.audioContext, bottomWall.frequency, bottomWall.waveform, bottomWall.initAmplitude);
   });
 
   //  Update functions (each tick):
